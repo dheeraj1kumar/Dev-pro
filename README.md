@@ -1,12 +1,6 @@
-# 🐳 Employee Management Application - Full Stack Containerization
+# 🐳 Employee Management Application - Full Stack Containerization (AWS EC2 Deployment)
 
-This project demonstrates the containerization of a simple full-stack application using **Docker** and **Docker Compose**. The application consists of a Java (Spring Boot/Maven) backend, a React frontend, and a PostgreSQL database.
-
-The project follows a staged approach to containerization:
-
-* **Level 1:** Basic Dockerfiles for individual services.
-* **Level 2:** Multi-stage Dockerfiles for optimized production images.
-* **Level 3 (Current State):** Orchestration of all services (backend, frontend, database) using `docker-compose.yml`.
+This project demonstrates the containerization of a simple full-stack application using **Docker** and **Docker Compose**. The application consists of a Java (Spring Boot/Maven) backend, a React frontend, and a PostgreSQL database, deployed on **AWS EC2**.
 
 ---
 
@@ -24,10 +18,24 @@ All services are connected via a dedicated network managed by Docker Compose, en
 
 ---
 
+## ⚙️ Deployment Environment Setup
+
+This section confirms the cloud infrastructure required to run the containers.
+
+### 1. AWS EC2 Instance Status
+The containers are deployed on an AWS EC2 instance.
+> *EC2 Instance details:*
+
+### 2. AWS Security Group Configuration
+The EC2 Security Group is configured to allow inbound traffic on the required application ports (`3000`, `8080`), as well as standard ports like `22` (SSH) and `80`.
+> *Inbound Rules:*
+
+---
+
 ## 🛠 Prerequisites
 
 To run this project, you need to have the following installed:
-
+* **EC2:** An active AWS EC2 instance (as shown above) to host the containers.
 * **Docker:** Used for building and running containers.
 * **Docker Compose:** Used for defining and running multi-container Docker applications.
 
@@ -41,7 +49,7 @@ This section outlines the key containerization steps, implemented in `Dockerfile
 
 * **Technology:** Java (Maven-based application, likely Spring Boot).
 * **Goal:** Create an image that packages the Java application (`app.jar`).
-* **Optimization (Level 2):** Use a **multi-stage build** to separate the build environment (using a full JDK and Maven) from the final runtime environment (using a lightweight JRE base image like `openjdk:17-jre-slim`). This significantly reduces the final image size.
+* **Optimization (Level 2):** Use a **multi-stage build** to separate the build environment (JDK) from the final runtime environment (JRE).
     * **Final Image Command:** `java -jar app.jar`
 * **Port:** Exposes **`8080`**.
 
@@ -49,20 +57,16 @@ This section outlines the key containerization steps, implemented in `Dockerfile
 
 * **Technology:** React or Angular.
 * **Goal:** Create an image that serves the static web application files.
-* **Optimization (Level 2):** Use a **multi-stage build** to separate the build phase (installing dependencies, building the app) from the serving phase (using a lightweight web server like Nginx or a simple static file server).
+* **Optimization (Level 2):** Use a **multi-stage build** to separate the build phase (e.g., `npm install`, `npm run build`) from the serving phase (e.g., Nginx).
 * **Port:** Exposes **`3000`**.
 
 ---
 
 ## ✨ Level 3: Orchestration with Docker Compose
 
-The `docker-compose.yml` file is the heart of this setup, defining and linking all three services.
+The `docker-compose.yml` file defines and links all three services.
 
 ### 1. Database Setup (`postgres`)
-
-The PostgreSQL service is configured with essential environment variables to set up the initial database, user, and password, which the backend uses to connect.
-
-**Environment Variables:**
 
 | Variable | Value | Purpose |
 | :--- | :--- | :--- |
@@ -72,7 +76,7 @@ The PostgreSQL service is configured with essential environment variables to set
 
 ### 2. Backend Connection
 
-The backend service is configured to connect to the database using the **service name** `postgres` (instead of `localhost` or an IP address).
+The backend connects to the database using the **service name** `postgres`.
 
 **Key Connection URL (Example):**
 `jdbc:postgresql://postgres:5432/employeesdb`
@@ -81,39 +85,36 @@ The backend service is configured to connect to the database using the **service
 
 ## ▶️ Getting Started
 
-Follow these steps to get the full application stack running using Docker Compose:
+Follow these steps to get the full application stack running using Docker Compose on the EC2 instance:
 
-1.  **Clone the Repository:** (Assume you have the project files)
+1.  **Clone the Repository:**
     ```bash
     git clone <your-repo-link>
     cd <project-directory>
     ```
 
 2.  **Build and Run the Services:**
-    The following command will build the necessary images (if they don't exist), create the network, and start all three containers in detached mode:
-
     ```bash
     docker-compose up -d --build
     ```
 
 3.  **Verify Running Containers:**
-    You can confirm all three containers are running using the command you showed in the terminal:
+    Confirm all three containers are **Up** and their ports are mapped correctly.
     ```bash
     docker ps -a
-    # Expected output should show backend, frontend, and postgres containers are "Up"
     ```
+    > *Running Containers:*
     
 4.  **Access the Application:**
 
-    * **Frontend (UI):** Open your browser and navigate to `http://<EC2_PUBLIC_IP>:3000`
-        * *(Your images show the frontend is running, but with no data initially.)*
-
-    * **Backend (API Check):** You can verify the API is accessible and working via the exposed port:
-        * `http://<EC2_PUBLIC_IP>:8080/api/v1/employees`
-        * *(Your first image confirms the API returns a JSON array, even if the data fields are `null` initially.)*
-
-5.  **Test the API (Postman/cURL):**
-    Use a tool like Postman to insert an initial record and confirm the end-to-end flow:
+    * **Frontend (UI):** Open your browser and navigate to `http://<EC2_PUBLIC_IP>:3000`.
+        > *Initial UI Load:*
+        
+    * **Backend (API Check):** Verify the API is accessible via `http://<EC2_PUBLIC_IP>:8080/api/v1/employees`.
+        > *API Response:*
+        
+5.  **Test the API (Postman):**
+    Use Postman to confirm the end-to-end flow by inserting a record.
 
     * **Method:** `POST`
     * **URL:** `http://<EC2_PUBLIC_IP>:8080/api/v1/employees`
@@ -125,7 +126,7 @@ Follow these steps to get the full application stack running using Docker Compos
           "department": "IT"
         }
         ```
-    * *(Your Postman image confirms a successful `POST` request to the backend.)*
+    > *Successful POST Request:*
     
 ---
 
@@ -134,4 +135,4 @@ Follow these steps to get the full application stack running using Docker Compos
 To stop and remove all containers, networks, and volumes created by `docker-compose up`:
 
 ```bash
-docker-compose downt 
+docker-compose down
