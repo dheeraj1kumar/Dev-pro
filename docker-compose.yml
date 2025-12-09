@@ -13,6 +13,8 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    networks:
+      - app-network
 
   # Spring Boot Backend
   backend:
@@ -28,17 +30,26 @@ services:
       SPRING_DATASOURCE_PASSWORD: postgres
     depends_on:
       - postgres
+    networks:
+      - app-network
 
-  # React Frontend
-  frontend:
-    build:
-      context: ./my-app
-      dockerfile: Dockerfile
-    container_name: frontend
-    ports:
-      - "3000:3000"
-    depends_on:
-      - backend
+  # React Frontend (served by Nginx)
+frontend:
+  build:
+    context: ./my-app
+    dockerfile: Dockerfile
+  container_name: frontend
+  ports:
+    - "3000:80"       # Container listens on 80, mapped to host 3000
+  environment:
+    - REACT_APP_API_URL=http://backend:8080/api/v1  # Correct backend URL inside Docker
+  depends_on:
+    - backend
+  networks:
+    - app-network
 
 volumes:
   postgres_data:
+
+networks:
+  app-network:

@@ -1,13 +1,36 @@
-# Build stage
-FROM node:20-alpine AS build
+### --- Build Stage --- ###
+FROM node:18 AS build
+
+# Set working directory
 WORKDIR /app
-COPY package.json package-lock.json ./
+
+# Copy only package files first (faster Docker caching)
+COPY package*.json ./
+
+# Install dependencies
 RUN npm install
+
+# Copy rest of the source code
 COPY . .
+
+# Fix Webpack/OpenSSL error for Node 18+
+ENV NODE_OPTIONS="--openssl-legacy-provider"
+
+# Build production React files
 RUN npm run build
 
-# Production stage
-FROM nginx:alpine
+
+### --- Production Stage (Nginx) --- ###
+FROM nginx:stable-alpine
+
+# Remove default Nginx webpage
+RUN rm -rf /usr/share/nginx/html/*
+
+# Copy React build from previous stage
 COPY --from=build /app/build /usr/share/nginx/html
-EXPOSE 3000
+
+# Expose port 80
+EXPOSE 80
+
+# Start Nginx
 CMD ["nginx", "-g", "daemon off;"]
