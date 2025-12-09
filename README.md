@@ -13,7 +13,7 @@ The application architecture is as follows:
 | **backend** | Java (Maven/Spring Boot) | `8080` | `8080` | Provides REST API for employee data. |
 | **frontend** | React/Angular | `3000` | `3000` | User interface to view and manage employees. |
 | **postgres** | PostgreSQL | `5432` | `5432` | Persistence layer for application data. |
-
+![All running Container](./Screenshot/Screenshot%20(33).png)
 All services are connected via a dedicated network managed by Docker Compose, ensuring seamless **inter-container communication** using service names (`backend`, `postgres`).
 
 ---
@@ -38,7 +38,7 @@ To run this project, you need to have the following installed:
 * **EC2:** An active AWS EC2 instance (as shown above) to host the containers.
 * **Docker:** Used for building and running containers.
 * **Docker Compose:** Used for defining and running multi-container Docker applications.
-
+![USED EC2 SERVICE](./Screenshot/Screenshot%20(39).png)
 ---
 
 ## 📦 Level 1 & 2: Individual Dockerization
@@ -54,7 +54,7 @@ This section outlines the key containerization steps, implemented in `Dockerfile
 * **Port:** Exposes **`8080`**.
 
 ### 2. Frontend (`dev-pro-frontend`)
-
+![FRONTEND REACT UI](./Screenshot/Screenshot%20(36).png)
 * **Technology:** React or Angular.
 * **Goal:** Create an image that serves the static web application files.
 * **Optimization (Level 2):** Use a **multi-stage build** to separate the build phase (e.g., `npm install`, `npm run build`) from the serving phase (e.g., Nginx).
@@ -112,7 +112,7 @@ Follow these steps to get the full application stack running using Docker Compos
         
     * **Backend (API Check):** Verify the API is accessible via `http://<EC2_PUBLIC_IP>:8080/api/v1/employees`.
         > *API Response:*
-        
+        ![Api response ](./Screenshot/Screenshot%20(34).png)
 5.  **Test the API (Postman):**
     Use Postman to confirm the end-to-end flow by inserting a record.
 
