@@ -1,55 +1,71 @@
 package in.bushansirgur.springbootrestapi.controller;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import in.bushansirgur.springbootrestapi.entity.Employee;
 import in.bushansirgur.springbootrestapi.repository.EmployeeRepository;
 
 @RestController
 @RequestMapping("/api/v1")
-@CrossOrigin("*")
+@CrossOrigin(origins = "*") // allow all origins; you can replace "*" with your frontend container URL
 public class EmployeeController {
-	
-	@Autowired
-	private EmployeeRepository eRepo;
-	
-	@GetMapping("/employees")
-	public List<Employee> getAllEmployees() {
-		return eRepo.findAll();
-	}
-	
-	@GetMapping("/employees/{id}")
-	public Employee getEmployeeById(@PathVariable Long id) {
-		return eRepo.findById(id).get();
-	}
-	
-	@PostMapping("/employees")
-	public Employee saveEmployeeDetails(@RequestBody Employee employee) {
-		return eRepo.save(employee);
-	}
-	
-	@PutMapping("/employees")
-	public Employee updateEmployee(@RequestBody Employee employee) {
-		return eRepo.save(employee);
-	}
-	
-	@DeleteMapping("/employees/{id}")
-	public ResponseEntity<HttpStatus> deleteEmployeeById(@PathVariable Long id) {
-		eRepo.deleteById(id);
-		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-	}
+
+    @Autowired
+    private EmployeeRepository eRepo;
+
+    // Get all employees
+    @GetMapping("/employees")
+    public List<Employee> getAllEmployees() {
+        return eRepo.findAll();
+    }
+
+    // Get employee by ID
+    @GetMapping("/employees/{id}")
+    public ResponseEntity<Employee> getEmployeeById(@PathVariable Long id) {
+        Optional<Employee> employee = eRepo.findById(id);
+        return employee.map(ResponseEntity::ok)
+                       .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    // Create a new employee
+    @PostMapping("/employees")
+    public ResponseEntity<Employee> saveEmployee(@RequestBody Employee employee) {
+        Employee savedEmployee = eRepo.save(employee);
+        return new ResponseEntity<>(savedEmployee, HttpStatus.CREATED);
+    }
+
+    // Update an existing employee
+    @PutMapping("/employees/{id}")
+    public ResponseEntity<Employee> updateEmployee(@PathVariable Long id, @RequestBody Employee employeeDetails) {
+        Optional<Employee> optionalEmployee = eRepo.findById(id);
+
+        if (optionalEmployee.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        Employee employee = optionalEmployee.get();
+        employee.setName(employeeDetails.getName());
+        employee.setLocation(employeeDetails.getLocation());
+        employee.setDepartment(employeeDetails.getDepartment());
+
+        Employee updatedEmployee = eRepo.save(employee);
+        return ResponseEntity.ok(updatedEmployee);
+    }
+
+    // Delete an employee
+    @DeleteMapping("/employees/{id}")
+    public ResponseEntity<HttpStatus> deleteEmployee(@PathVariable Long id) {
+        if (!eRepo.existsById(id)) {
+            return ResponseEntity.notFound().build();
+        }
+
+        eRepo.deleteById(id);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
 }
