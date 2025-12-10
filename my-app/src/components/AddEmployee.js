@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useHistory, useParams } from "react-router-dom";
-import { useEffect } from "react/cjs/react.development";
+import { useEffect } from "react"
 import employeeService from "../services/employee.service";
 
 const AddEmployee = () => {

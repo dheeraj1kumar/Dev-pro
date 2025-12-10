@@ -7,17 +7,14 @@ import AddEmployee from './components/AddEmployee';
 function App() {
   return (
     <BrowserRouter>
-      <div>
-        <div>
-          <Switch>
-            <Route exact path="/" component={EmployeeList} />
-            <Route path="/add" component={AddEmployee} />
-            <Route path="/employees/edit/:id" component={AddEmployee} />
-            <Route path="*" component={NotFound} />
-          </Switch>
-        </div>
-      </div>
-    </BrowserRouter>
+  <Switch>
+    <Route exact path="/" component={EmployeeList} />
+    <Route path="/add" component={AddEmployee} />
+    <Route path="/employees/edit/:id" component={AddEmployee} />
+    <Route path="*" component={NotFound} />
+  </Switch>
+</BrowserRouter>
+
   );
 }
 
